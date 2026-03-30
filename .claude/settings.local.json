@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(where python:*)",
+      "Bash(where msbuild:*)",
+      "Bash(where cl:*)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Read(//c/Program Files/**)",
+      "Bash(npx --yes @electron/rebuild -f -w better-sqlite3)",
+      "Bash(node node_modules/electron/install.js)",
+      "Bash(pkill -f \"electron-vite dev\")",
+      "Bash(pkill -f electron.exe)",
+      "Bash(taskkill /F /IM electron.exe /T)",
+      "Bash(npm run:*)",
+      "Bash(ls:*)",
+      "Bash(taskkill /F /IM CRM.exe /T)",
+      "Bash(taskkill /F /IM electron.exe)",
+      "Bash(taskkill /F /IM CRM.exe)",
+      "Bash(npx electron-vite:*)"
+    ]
+  }
+}
