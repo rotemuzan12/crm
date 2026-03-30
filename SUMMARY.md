@@ -173,3 +173,4 @@ npm run build
 ```
 
 כל תקשורת בין renderer ל-main עוברת דרך IPC מאובטח — אין גישה ישירה ל-Node.js מהrenderer.
+

@@ -93,7 +93,7 @@ export const STAGE_LABELS: Record<DealStage, string> = {
   qualified: 'רלוונטי',
   proposal: 'הצעת מחיר',
   negotiation: 'משא ומתן',
-  closed_won: 'זכייה',
+  closed_won: 'רווח',
   closed_lost: 'הפסד'
 }
 
