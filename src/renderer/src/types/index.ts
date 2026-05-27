@@ -195,6 +195,9 @@ export const PAYMENT_METHOD_ICONS: Record<PaymentMethod, string> = {
 declare global {
   interface Window {
     api: {
+      app: {
+        getVersion: () => Promise<string>
+      }
       clients: {
         list: (filters?: { search?: string; status?: string }) => Promise<Client[]>
         get: (id: number) => Promise<Client | null>

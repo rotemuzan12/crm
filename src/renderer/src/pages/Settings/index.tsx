@@ -8,6 +8,8 @@ interface TelegramStatus {
 }
 
 export default function SettingsPage(): React.ReactElement {
+  const [appVersion, setAppVersion] = useState('')
+
   // Telegram
   const [token, setToken] = useState('')
   const [allowedUsers, setAllowedUsers] = useState('')
@@ -27,6 +29,7 @@ export default function SettingsPage(): React.ReactElement {
   const [backupMsg, setBackupMsg] = useState<string | null>(null)
 
   useEffect(() => {
+    window.api.app.getVersion().then(setAppVersion)
     loadSettings()
     checkTelegramStatus()
   }, [])
@@ -334,7 +337,7 @@ export default function SettingsPage(): React.ReactElement {
 
       {/* Version */}
       <div className="text-xs text-slate-400 text-center pb-4">
-        UzanLab CRM גרסה 1.0.1 · ניהול לקוחות שולחני
+        UzanLab CRM גרסה {appVersion || '...'} · ניהול לקוחות שולחני
       </div>
     </div>
   )

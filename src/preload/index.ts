@@ -2,6 +2,10 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 const api = {
+  app: {
+    getVersion: () => ipcRenderer.invoke('app:getVersion')
+  },
+
   clients: {
     list: (filters?: object) => ipcRenderer.invoke('clients:list', filters),
     get: (id: number) => ipcRenderer.invoke('clients:get', id),

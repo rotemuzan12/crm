@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import logo from '@renderer/assets/uzanlab-logo.png'
 
@@ -70,6 +70,12 @@ const navItems: NavItem[] = [
 ]
 
 export default function Sidebar(): React.ReactElement {
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    window.api.app.getVersion().then(setVersion)
+  }, [])
+
   return (
     <aside className="w-56 bg-slate-900 flex flex-col h-full shrink-0">
       <div className="px-4 py-5 border-b border-slate-700/50">
@@ -99,7 +105,7 @@ export default function Sidebar(): React.ReactElement {
       </nav>
 
       <div className="px-4 py-3 border-t border-slate-700/50">
-        <p className="text-slate-600 text-xs">גרסה 1.0.0</p>
+        <p className="text-slate-600 text-xs">גרסה {version || '...'}</p>
       </div>
     </aside>
   )

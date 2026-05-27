@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, dialog } from 'electron'
+import { app, BrowserWindow, shell, dialog, ipcMain } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
@@ -75,6 +75,8 @@ function createWindow(): BrowserWindow {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('app:getVersion', () => app.getVersion())
+
   const db = openDatabase()
   registerAllHandlers(db)
   const win = createWindow()
