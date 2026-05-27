@@ -1,6 +1,6 @@
 {
   "name": "crm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ניהול לקוחות — CRM שולחני מקומי",
   "main": "out/main/index.js",
   "scripts": {
@@ -40,7 +40,7 @@
   },
   "build": {
     "appId": "com.crm.desktop",
-    "productName": "CRM",
+    "productName": "UzanLab CRM",
     "copyright": "Copyright © 2026",
     "npmRebuild": false,
     "asar": true,
@@ -81,7 +81,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "CRM",
+      "shortcutName": "UzanLab CRM",
       "deleteAppDataOnUninstall": false
     }
   }

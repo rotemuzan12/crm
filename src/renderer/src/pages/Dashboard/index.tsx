@@ -52,12 +52,11 @@ function StatCard({ label, value, isAlert, icon }: StatCardProps): React.ReactEl
   )
 }
 
-const STAGE_ORDER = ['lead', 'qualified', 'proposal', 'negotiation']
+const STAGE_ORDER = ['lead', 'qualified', 'in_progress']
 const STAGE_HEADER_COLORS: Record<string, string> = {
   lead: 'bg-slate-100 text-slate-700',
   qualified: 'bg-blue-100 text-blue-700',
-  proposal: 'bg-violet-100 text-violet-700',
-  negotiation: 'bg-amber-100 text-amber-700',
+  in_progress: 'bg-amber-100 text-amber-700',
 }
 
 export default function Dashboard(): React.ReactElement {

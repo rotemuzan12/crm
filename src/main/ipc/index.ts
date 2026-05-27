@@ -4,6 +4,7 @@ import { registerContactHandlers } from './contacts'
 import { registerDealHandlers } from './deals'
 import { registerTaskHandlers } from './tasks'
 import { registerNoteHandlers } from './notes'
+import { registerPaymentHandlers } from './payments'
 import { registerDashboardHandlers } from './dashboard'
 import { registerSearchHandlers } from './search'
 import { registerSettingsHandlers } from './settings'
@@ -17,6 +18,7 @@ export function registerAllHandlers(db: Database.Database): void {
   registerDealHandlers(db)
   registerTaskHandlers(db)
   registerNoteHandlers(db)
+  registerPaymentHandlers(db)
   registerDashboardHandlers(db)
   registerSearchHandlers(db)
   registerSettingsHandlers(db)

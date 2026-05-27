@@ -24,7 +24,7 @@ export interface Contact {
   updated_at: string
 }
 
-export type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
+export type DealStage = 'lead' | 'qualified' | 'in_progress' | 'completed' | 'paid_closed' | 'irrelevant'
 
 export interface Deal {
   id: number
@@ -66,6 +66,23 @@ export interface Note {
   created_at: string
 }
 
+export type PaymentMethod = 'transfer' | 'cash' | 'check' | 'bit' | 'paybox' | 'credit' | 'other'
+
+export interface Payment {
+  id: number
+  deal_id: number | null
+  client_id: number | null
+  deal_title: string | null
+  client_name: string | null
+  amount: number
+  currency: string
+  payment_date: string
+  method: PaymentMethod
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface DashboardData {
   stats: {
     totalClients: number
@@ -90,29 +107,29 @@ export interface SearchResult {
 
 export const STAGE_LABELS: Record<DealStage, string> = {
   lead: 'ליד',
-  qualified: 'רלוונטי',
-  proposal: 'הצעת מחיר',
-  negotiation: 'משא ומתן',
-  closed_won: 'רווח',
-  closed_lost: 'הפסד'
+  qualified: 'רלוונטי והצעת מחיר',
+  in_progress: 'בתהליך עבודה',
+  completed: 'בוצע',
+  paid_closed: 'שולם וסגור',
+  irrelevant: 'לא רלוונטי'
 }
 
 export const STAGE_COLORS: Record<DealStage, string> = {
   lead: 'bg-slate-100 text-slate-700',
   qualified: 'bg-blue-100 text-blue-700',
-  proposal: 'bg-violet-100 text-violet-700',
-  negotiation: 'bg-amber-100 text-amber-700',
-  closed_won: 'bg-emerald-100 text-emerald-700',
-  closed_lost: 'bg-red-100 text-red-700'
+  in_progress: 'bg-amber-100 text-amber-700',
+  completed: 'bg-emerald-100 text-emerald-700',
+  paid_closed: 'bg-teal-100 text-teal-700',
+  irrelevant: 'bg-red-100 text-red-700'
 }
 
 export const STAGE_BORDER_COLORS: Record<DealStage, string> = {
   lead: 'border-slate-300',
   qualified: 'border-blue-300',
-  proposal: 'border-violet-300',
-  negotiation: 'border-amber-300',
-  closed_won: 'border-emerald-300',
-  closed_lost: 'border-red-300'
+  in_progress: 'border-amber-300',
+  completed: 'border-emerald-300',
+  paid_closed: 'border-teal-300',
+  irrelevant: 'border-red-300'
 }
 
 export const PRIORITY_LABELS: Record<string, string> = {
@@ -153,6 +170,26 @@ export const NOTE_TYPE_ICONS: Record<string, string> = {
   meeting: '🤝'
 }
 
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  transfer: 'העברה בנקאית',
+  cash: 'מזומן',
+  check: 'צ\'ק',
+  bit: 'ביט',
+  paybox: 'פייבוקס',
+  credit: 'אשראי',
+  other: 'אחר'
+}
+
+export const PAYMENT_METHOD_ICONS: Record<PaymentMethod, string> = {
+  transfer: '🏦',
+  cash: '💵',
+  check: '📃',
+  bit: '📱',
+  paybox: '📱',
+  credit: '💳',
+  other: '💰'
+}
+
 // ─── Window API types ───────────────────────────────────────────────────────
 
 declare global {
@@ -190,6 +227,13 @@ declare global {
       notes: {
         list: (filters?: { client_id?: number; deal_id?: number }) => Promise<Note[]>
         create: (data: Omit<Note, 'id' | 'created_at' | 'client_name' | 'deal_title'>) => Promise<Note>
+        delete: (id: number) => Promise<void>
+      }
+      payments: {
+        list: (filters?: { client_id?: number; deal_id?: number }) => Promise<Payment[]>
+        get: (id: number) => Promise<Payment | null>
+        create: (data: Omit<Payment, 'id' | 'created_at' | 'updated_at' | 'client_name' | 'deal_title'>) => Promise<Payment>
+        update: (id: number, data: Partial<Omit<Payment, 'id' | 'created_at' | 'updated_at' | 'client_name' | 'deal_title'>>) => Promise<Payment>
         delete: (id: number) => Promise<void>
       }
       dashboard: {

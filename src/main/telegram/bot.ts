@@ -7,11 +7,11 @@ let isRunning = false
 // ── Stage labels in Hebrew ────────────────────────────────────────────────
 const STAGE_LABELS: Record<string, string> = {
   lead: 'ליד',
-  qualified: 'מוסמך',
-  proposal: 'הצעה',
-  negotiation: 'מו"מ',
-  closed_won: 'נסגר בהצלחה',
-  closed_lost: 'נסגר ללא עסקה'
+  qualified: 'רלוונטי והצעת מחיר',
+  in_progress: 'בתהליך עבודה',
+  completed: 'בוצע',
+  paid_closed: 'שולם וסגור',
+  irrelevant: 'לא רלוונטי'
 }
 
 // ── Priority labels in Hebrew ─────────────────────────────────────────────
@@ -20,6 +20,20 @@ const PRIORITY_LABELS: Record<string, string> = {
   medium: 'בינונית',
   high: 'גבוהה'
 }
+
+// ── Payment method labels in Hebrew ───────────────────────────────────────
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  transfer: 'העברה בנקאית',
+  cash: 'מזומן',
+  check: 'צ\'ק',
+  bit: 'ביט',
+  paybox: 'פייבוקס',
+  credit: 'אשראי',
+  other: 'אחר'
+}
+
+// Marker used to represent payments with no linked client in callback data
+const NO_CLIENT_KEY = '0'
 
 function formatAmount(amount: number | null, currency: string): string {
   if (amount === null || amount === undefined) return 'לא צוין'
@@ -56,7 +70,7 @@ export function startBot(
     }
     bot!.sendMessage(
       chatId,
-      'ברוכים הבאים ל-CRM! 🎉\nהקלד /help לרשימת פקודות'
+      'ברוכים הבאים ל-UzanLab CRM! 🎉\nהקלד /help לרשימת פקודות'
     )
   })
 
@@ -72,6 +86,7 @@ export function startBot(
       `רשימת פקודות זמינות:\n\n` +
         `/today - משימות להיום\n` +
         `/deals - עסקאות פעילות\n` +
+        `/payments - תשלומים לפי לקוח\n` +
         `/client <שם> - חיפוש לקוח\n` +
         `/add_note <לקוח> <טקסט> - הוספת הערה\n` +
         `/create_task <לקוח> <משימה> - יצירת משימה\n` +
@@ -128,7 +143,7 @@ export function startBot(
           `SELECT d.title, d.stage, d.amount, d.currency, cl.name AS client_name
            FROM deals d
            LEFT JOIN clients cl ON d.client_id = cl.id
-           WHERE d.stage NOT IN ('closed_won', 'closed_lost')
+           WHERE d.stage NOT IN ('completed', 'paid_closed', 'irrelevant')
            ORDER BY d.created_at DESC`
         )
         .all() as Array<{
@@ -189,7 +204,7 @@ export function startBot(
       const activeDeals = (
         db
           .prepare(
-            `SELECT COUNT(*) AS cnt FROM deals WHERE client_id = ? AND stage NOT IN ('closed_won', 'closed_lost')`
+            `SELECT COUNT(*) AS cnt FROM deals WHERE client_id = ? AND stage NOT IN ('completed', 'paid_closed', 'irrelevant')`
           )
           .get(client.id) as { cnt: number }
       ).cnt
@@ -314,15 +329,14 @@ export function startBot(
         .prepare(
           `SELECT stage, COUNT(*) AS count, COALESCE(SUM(amount), 0) AS total
            FROM deals
-           WHERE stage NOT IN ('closed_won', 'closed_lost')
+           WHERE stage NOT IN ('completed', 'paid_closed', 'irrelevant')
            GROUP BY stage
            ORDER BY
              CASE stage
                WHEN 'lead' THEN 1
                WHEN 'qualified' THEN 2
-               WHEN 'proposal' THEN 3
-               WHEN 'negotiation' THEN 4
-               ELSE 5
+               WHEN 'in_progress' THEN 3
+               ELSE 4
              END`
         )
         .all() as Array<{ stage: string; count: number; total: number }>
@@ -353,6 +367,163 @@ export function startBot(
     } catch (err) {
       bot!.sendMessage(chatId, `שגיאה: ${String(err)}`)
     }
+  })
+
+  // ── /payments ─────────────────────────────────────────────────────────
+  // Shows an inline keyboard of clients that have payments. Tap a client to
+  // see their full payment history.
+  bot.onText(/\/payments(?:\s+(.+))?/, (msg, match) => {
+    const chatId = msg.chat.id
+    if (!isAuthorized(msg.from?.id, allowedUserIds)) {
+      bot!.sendMessage(chatId, 'אין לך הרשאה להשתמש בבוט זה.')
+      return
+    }
+
+    // Optional text fallback: /payments <client name>
+    const arg = match?.[1]?.trim()
+    if (arg) {
+      try {
+        const client = db
+          .prepare('SELECT id, name FROM clients WHERE name LIKE ? LIMIT 1')
+          .get(`%${arg}%`) as { id: number; name: string } | undefined
+        if (!client) {
+          bot!.sendMessage(chatId, `לא נמצא לקוח בשם "${arg}".`)
+          return
+        }
+        sendClientPayments(chatId, client.id, client.name)
+      } catch (err) {
+        bot!.sendMessage(chatId, `שגיאה: ${String(err)}`)
+      }
+      return
+    }
+
+    try {
+      const rows = db
+        .prepare(
+          `SELECT
+             COALESCE(p.client_id, 0) AS client_id,
+             COALESCE(cl.name, 'ללא לקוח') AS client_name,
+             COUNT(*) AS count,
+             COALESCE(SUM(CASE WHEN p.currency = 'ILS' THEN p.amount ELSE 0 END), 0) AS total_ils
+           FROM payments p
+           LEFT JOIN clients cl ON p.client_id = cl.id
+           GROUP BY COALESCE(p.client_id, 0), COALESCE(cl.name, 'ללא לקוח')
+           ORDER BY total_ils DESC, count DESC
+           LIMIT 30`
+        )
+        .all() as Array<{ client_id: number; client_name: string; count: number; total_ils: number }>
+
+      if (rows.length === 0) {
+        bot!.sendMessage(chatId, 'אין תשלומים רשומים במערכת.')
+        return
+      }
+
+      const keyboard = rows.map((r) => {
+        const totalLabel = r.total_ils > 0
+          ? new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 }).format(r.total_ils)
+          : ''
+        const buttonText = totalLabel
+          ? `${r.client_name} · ${r.count} · ${totalLabel}`
+          : `${r.client_name} · ${r.count} תשלומים`
+        return [{ text: buttonText, callback_data: `pay:c:${r.client_id || NO_CLIENT_KEY}` }]
+      })
+
+      bot!.sendMessage(chatId, '💰 בחר לקוח לצפייה בתשלומים:', {
+        reply_markup: { inline_keyboard: keyboard }
+      })
+    } catch (err) {
+      bot!.sendMessage(chatId, `שגיאה: ${String(err)}`)
+    }
+  })
+
+  // Helper: send the full payment list for a single client to a chat
+  function sendClientPayments(chatId: number, clientId: number, clientName: string): void {
+    const isOrphan = clientId === 0
+    const payments = db
+      .prepare(
+        isOrphan
+          ? `SELECT p.amount, p.currency, p.payment_date, p.method, p.notes, d.title AS deal_title
+             FROM payments p
+             LEFT JOIN deals d ON p.deal_id = d.id
+             WHERE p.client_id IS NULL
+             ORDER BY p.payment_date DESC, p.created_at DESC`
+          : `SELECT p.amount, p.currency, p.payment_date, p.method, p.notes, d.title AS deal_title
+             FROM payments p
+             LEFT JOIN deals d ON p.deal_id = d.id
+             WHERE p.client_id = ?
+             ORDER BY p.payment_date DESC, p.created_at DESC`
+      )
+      .all(...(isOrphan ? [] : [clientId])) as Array<{
+        amount: number
+        currency: string
+        payment_date: string
+        method: string
+        notes: string | null
+        deal_title: string | null
+      }>
+
+    if (payments.length === 0) {
+      bot!.sendMessage(chatId, `אין תשלומים רשומים ל-${clientName}.`)
+      return
+    }
+
+    const totalsByCurrency: Record<string, number> = {}
+    for (const p of payments) {
+      totalsByCurrency[p.currency] = (totalsByCurrency[p.currency] ?? 0) + p.amount
+    }
+    const totalsLine = Object.entries(totalsByCurrency)
+      .map(([cur, total]) => new Intl.NumberFormat('he-IL', { style: 'currency', currency: cur, maximumFractionDigits: 2 }).format(total))
+      .join(' · ')
+
+    const lines = payments.map((p) => {
+      const date = new Date(p.payment_date).toLocaleDateString('he-IL')
+      const amount = new Intl.NumberFormat('he-IL', { style: 'currency', currency: p.currency, maximumFractionDigits: 2 }).format(p.amount)
+      const method = PAYMENT_METHOD_LABELS[p.method] ?? p.method
+      const deal = p.deal_title ? ` · ${p.deal_title}` : ''
+      const note = p.notes ? `\n  📝 ${p.notes}` : ''
+      return `• ${date} · ${amount} · ${method}${deal}${note}`
+    })
+
+    const header = `💰 תשלומים — ${clientName} (${payments.length})`
+    const summary = `סה"כ: ${totalsLine}`
+    bot!.sendMessage(chatId, `${header}\n${summary}\n\n${lines.join('\n')}`)
+  }
+
+  // ── Inline keyboard callbacks ─────────────────────────────────────────
+  bot.on('callback_query', (query) => {
+    const chatId = query.message?.chat.id
+    if (!chatId) return
+    if (!isAuthorized(query.from?.id, allowedUserIds)) {
+      bot!.answerCallbackQuery(query.id, { text: 'אין הרשאה' })
+      return
+    }
+
+    const data = query.data ?? ''
+    if (data.startsWith('pay:c:')) {
+      const idStr = data.slice('pay:c:'.length)
+      const clientId = parseInt(idStr, 10)
+      try {
+        if (clientId === 0) {
+          sendClientPayments(chatId, 0, 'ללא לקוח')
+        } else {
+          const client = db.prepare('SELECT name FROM clients WHERE id = ?').get(clientId) as
+            | { name: string }
+            | undefined
+          if (!client) {
+            bot!.answerCallbackQuery(query.id, { text: 'הלקוח לא נמצא' })
+            return
+          }
+          sendClientPayments(chatId, clientId, client.name)
+        }
+        bot!.answerCallbackQuery(query.id)
+      } catch (err) {
+        bot!.answerCallbackQuery(query.id, { text: 'שגיאה' })
+        console.error('[Telegram] callback error:', err)
+      }
+      return
+    }
+
+    bot!.answerCallbackQuery(query.id)
   })
 
   // ── Polling error handler ──────────────────────────────────────────────

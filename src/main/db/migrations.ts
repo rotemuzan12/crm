@@ -69,5 +69,25 @@ export function runMigrations(db: Database.Database): void {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      deal_id INTEGER REFERENCES deals(id) ON DELETE SET NULL,
+      client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL,
+      amount REAL NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'ILS',
+      payment_date TEXT NOT NULL,
+      method TEXT NOT NULL DEFAULT 'transfer',
+      notes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    );
+  `)
+
+  db.exec(`
+    UPDATE deals SET stage = 'qualified'   WHERE stage = 'proposal';
+    UPDATE deals SET stage = 'in_progress' WHERE stage = 'negotiation';
+    UPDATE deals SET stage = 'completed'   WHERE stage = 'closed_won';
+    UPDATE deals SET stage = 'irrelevant'  WHERE stage = 'closed_lost';
   `)
 }

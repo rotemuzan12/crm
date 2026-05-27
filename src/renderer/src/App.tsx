@@ -6,6 +6,7 @@ import ClientsPage from '@renderer/pages/Clients'
 import ClientDetail from '@renderer/pages/Clients/ClientDetail'
 import ContactsPage from '@renderer/pages/Contacts'
 import DealsPage from '@renderer/pages/Deals'
+import PaymentsPage from '@renderer/pages/Payments'
 import TasksPage from '@renderer/pages/Tasks'
 import SettingsPage from '@renderer/pages/Settings'
 
@@ -20,6 +21,7 @@ export default function App(): React.ReactElement {
           <Route path="clients/:id" element={<ClientDetail />} />
           <Route path="contacts" element={<ContactsPage />} />
           <Route path="deals" element={<DealsPage />} />
+          <Route path="payments" element={<PaymentsPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>

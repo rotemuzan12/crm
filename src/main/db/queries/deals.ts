@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 
-export type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
+export type DealStage = 'lead' | 'qualified' | 'in_progress' | 'completed' | 'paid_closed' | 'irrelevant'
 
 export interface Deal {
   id: number

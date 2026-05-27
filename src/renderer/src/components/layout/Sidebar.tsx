@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import logo from '@renderer/assets/uzanlab-logo.png'
 
 interface NavItem {
   path: string
@@ -37,6 +38,13 @@ const DealsIcon = () => (
   </svg>
 )
 
+const PaymentsIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="1" x2="12" y2="23" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+)
+
 const TasksIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 11 12 14 22 4" />
@@ -56,6 +64,7 @@ const navItems: NavItem[] = [
   { path: '/clients', label: 'לקוחות', icon: <ClientsIcon /> },
   { path: '/contacts', label: 'אנשי קשר', icon: <ContactsIcon /> },
   { path: '/deals', label: 'עסקאות', icon: <DealsIcon /> },
+  { path: '/payments', label: 'תשלומים', icon: <PaymentsIcon /> },
   { path: '/tasks', label: 'משימות', icon: <TasksIcon /> },
   { path: '/settings', label: 'הגדרות', icon: <SettingsIcon /> },
 ]
@@ -65,12 +74,8 @@ export default function Sidebar(): React.ReactElement {
     <aside className="w-56 bg-slate-900 flex flex-col h-full shrink-0">
       <div className="px-4 py-5 border-b border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-blue-500 rounded flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </div>
-          <span className="text-white font-bold text-lg tracking-tight">CRM</span>
+          <img src={logo} alt="UzanLab" className="w-8 h-8 rounded-full shrink-0" />
+          <span className="text-white font-bold text-lg tracking-tight">UzanLab CRM</span>
         </div>
       </div>
 

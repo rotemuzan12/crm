@@ -10,16 +10,16 @@ interface Props {
   onReload: () => void
 }
 
-const ACTIVE_STAGES: DealStage[] = ['lead', 'qualified', 'proposal', 'negotiation']
-const ALL_STAGES: DealStage[] = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
+const ACTIVE_STAGES: DealStage[] = ['lead', 'qualified', 'in_progress']
+const ALL_STAGES: DealStage[] = ['lead', 'qualified', 'in_progress', 'completed', 'paid_closed', 'irrelevant']
 
 const COLUMN_HEADER_COLORS: Record<DealStage, string> = {
   lead: 'bg-slate-100 border-slate-200',
   qualified: 'bg-blue-50 border-blue-200',
-  proposal: 'bg-violet-50 border-violet-200',
-  negotiation: 'bg-amber-50 border-amber-200',
-  closed_won: 'bg-emerald-50 border-emerald-200',
-  closed_lost: 'bg-red-50 border-red-200'
+  in_progress: 'bg-amber-50 border-amber-200',
+  completed: 'bg-emerald-50 border-emerald-200',
+  paid_closed: 'bg-teal-50 border-teal-200',
+  irrelevant: 'bg-red-50 border-red-200'
 }
 
 function formatAmount(amount: number | null, currency: string): string {

@@ -334,7 +334,7 @@ export default function SettingsPage(): React.ReactElement {
 
       {/* Version */}
       <div className="text-xs text-slate-400 text-center pb-4">
-        CRM גרסה 1.0.0 · ניהול לקוחות שולחני
+        UzanLab CRM גרסה 1.0.1 · ניהול לקוחות שולחני
       </div>
     </div>
   )

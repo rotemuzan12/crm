@@ -55,7 +55,7 @@ export function getDashboardData(db: Database.Database): DashboardData {
 
   const activeDealsRow = db
     .prepare(
-      "SELECT COUNT(*) AS cnt, COALESCE(SUM(amount), 0) AS total FROM deals WHERE stage NOT IN ('closed_won', 'closed_lost')"
+      "SELECT COUNT(*) AS cnt, COALESCE(SUM(amount), 0) AS total FROM deals WHERE stage NOT IN ('completed', 'paid_closed', 'irrelevant')"
     )
     .get() as { cnt: number; total: number }
 
@@ -128,10 +128,10 @@ export function getDashboardData(db: Database.Database): DashboardData {
         CASE stage
           WHEN 'lead' THEN 1
           WHEN 'qualified' THEN 2
-          WHEN 'proposal' THEN 3
-          WHEN 'negotiation' THEN 4
-          WHEN 'closed_won' THEN 5
-          WHEN 'closed_lost' THEN 6
+          WHEN 'in_progress' THEN 3
+          WHEN 'completed' THEN 4
+          WHEN 'paid_closed' THEN 5
+          WHEN 'irrelevant' THEN 6
           ELSE 7
         END`
     )

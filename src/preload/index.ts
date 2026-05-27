@@ -42,6 +42,14 @@ const api = {
     delete: (id: number) => ipcRenderer.invoke('notes:delete', id)
   },
 
+  payments: {
+    list: (filters?: object) => ipcRenderer.invoke('payments:list', filters),
+    get: (id: number) => ipcRenderer.invoke('payments:get', id),
+    create: (data: object) => ipcRenderer.invoke('payments:create', data),
+    update: (id: number, data: object) => ipcRenderer.invoke('payments:update', id, data),
+    delete: (id: number) => ipcRenderer.invoke('payments:delete', id)
+  },
+
   dashboard: {
     getData: () => ipcRenderer.invoke('dashboard:getData')
   },
