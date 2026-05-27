@@ -111,7 +111,7 @@ export function seedDatabase(db: Database.Database): void {
     title: 'פרויקט מערכת ענן - לוי טכנולוגיות',
     amount: 250000,
     currency: 'ILS',
-    stage: 'proposal',
+    stage: 'qualified',
     expected_close_date: '2026-04-15',
     notes: 'הצעת מחיר נשלחה. ממתין לאישור.'
   })
@@ -121,7 +121,7 @@ export function seedDatabase(db: Database.Database): void {
     title: 'תחזוקה שנתית - לוי טכנולוגיות',
     amount: 85000,
     currency: 'ILS',
-    stage: 'closed_won',
+    stage: 'completed',
     expected_close_date: '2026-02-01',
     notes: 'חוזה נחתם בהצלחה.'
   })
@@ -131,7 +131,7 @@ export function seedDatabase(db: Database.Database): void {
     title: 'קמפיין שיווק דיגיטלי Q2',
     amount: 120000,
     currency: 'ILS',
-    stage: 'negotiation',
+    stage: 'in_progress',
     expected_close_date: '2026-04-01',
     notes: 'מנהלים משא ומתן על היקף הפרויקט.'
   })
@@ -151,7 +151,7 @@ export function seedDatabase(db: Database.Database): void {
     title: 'ייבוא מכשירי אלקטרוניקה - מארס 2026',
     amount: 500000,
     currency: 'ILS',
-    stage: 'closed_won',
+    stage: 'completed',
     expected_close_date: '2026-03-01',
     notes: 'העסקה הושלמה. המוצרים הגיעו למחסן.'
   })
@@ -181,7 +181,7 @@ export function seedDatabase(db: Database.Database): void {
     title: 'שיווק פרויקט דיור חדש',
     amount: 30000,
     currency: 'ILS',
-    stage: 'closed_lost',
+    stage: 'irrelevant',
     expected_close_date: '2026-01-15',
     notes: 'הלקוח בחר בספק אחר.'
   })
